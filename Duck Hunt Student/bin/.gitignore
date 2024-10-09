@@ -1,4 +1,17 @@
-/Duck.class
-/Frame.class
-/Music.class
 /imgs/
+/Character.class
+/Frame.class
+/GameBackground.class
+/Music.class
+/StdAudio$1.class
+/StdAudio$BackgroundRunnable.class
+/StdAudio$QueueOfDoubles.class
+/StdAudio.class
+/bg.class
+/blueplane.class
+/greenplane.class
+/Frame$Frame.class
+/blueplane2.class
+/Asteroid.class
+/Bullet.class
+/pixilart-drawing (6).png
