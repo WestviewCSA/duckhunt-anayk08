@@ -23,7 +23,7 @@ public class Frame extends JPanel implements ActionListener, MouseListener, KeyL
     bg BG = new bg();
     Asteroid asteroid = new Asteroid();
 
-    int greenSpeed = -20;
+    int greenSpeed = -10;
     int greenX = 500;
     int greenY = (int) (Math.random() * (700 - 11)) + 10;
     int astSpeed = -10;
@@ -34,14 +34,20 @@ public class Frame extends JPanel implements ActionListener, MouseListener, KeyL
 
     Font font = new Font("Serif", Font.BOLD, 85);
     boolean greenActive = true; // Track if the green plane is active
+    boolean movingToAsteroid = false; // Track if the green plane is moving to the asteroid
 
     public void paint(Graphics g) {
         super.paintComponent(g);
         g.setFont(font);
         BG.paint(g);
 
-        // Only paint the green plane if it is active
+        // Only paint the green plane if it is active or moving towards the asteroid
         if (greenActive) {
+            green.setXY(greenX, greenY);
+            green.paint(g);
+        } else if (movingToAsteroid) {
+            // Move the green plane towards the asteroid
+            moveGreenPlaneToAsteroid();
             green.setXY(greenX, greenY);
             green.paint(g);
         }
@@ -106,17 +112,55 @@ public class Frame extends JPanel implements ActionListener, MouseListener, KeyL
         greenX = 500; // Reset green plane position
         greenY = (int) (Math.random() * (700 - 11)) + 10;
         greenActive = true; // Set green plane active again
+        movingToAsteroid = false; // Reset movement state
+    }
+
+    private void moveGreenPlaneToAsteroid() {
+        int targetX = astX;
+        int targetY = astY;
+
+        // Calculate direction vector
+        int dx = targetX - greenX;
+        int dy = targetY - greenY;
+
+        // Normalize direction vector
+        double distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance > 0) {
+            dx = (int) (dx / distance * 10); // Increased speed to 10
+            dy = (int) (dy / distance * 10); // Increased speed to 10
+            greenX += dx;
+            greenY += dy;
+
+            // Check if the green plane has reached the asteroid
+            if (Math.abs(greenX - targetX) < 5 && Math.abs(greenY - targetY) < 5) {
+                movingToAsteroid = false; // Stop moving
+                greenActive = false; // Make the green plane disappear
+                System.out.println("Green plane reached the asteroid and disappeared!");
+            }
+        }
     }
 
     @Override
     public void mouseClicked(MouseEvent arg0) {
-        // Handle mouse click event
-        Rectangle rMouse = new Rectangle(arg0.getX(), arg0.getY(), 1, 1);
-        Rectangle rPlane = new Rectangle(greenX, greenY, green.getWidth(), green.getHeight());
+        // Create a hitbox for the mouse click
+        Rectangle rMouse = new Rectangle(arg0.getX(), arg0.getY(), 100, 100);
+        
+        // Create a larger hitbox for the green plane
+        int hitboxWidth = 200;  // Increased width for better hit detection
+        int hitboxHeight = 200; // Increased height for better hit detection
+        Rectangle rGreenPlane = new Rectangle(greenX - (hitboxWidth / 2), greenY - (hitboxHeight / 2), hitboxWidth, hitboxHeight);
 
-        if (rMouse.intersects(rPlane) && greenActive) {
-            score += 1;
+        // Calculate the blue plane's hitbox
+        int blueX = d.getX(); // Get the x coordinate of the blue plane
+        int blueY = d.getY(); // Get the y coordinate of the blue plane
+        Rectangle rBluePlane = new Rectangle(blueX, blueY, 100, 100);
+
+        // Check if the blue plane's hitbox intersects with the green plane's hitbox
+        if (rBluePlane.intersects(rGreenPlane) && greenActive) {
+            score += 1; // Increase score by one
             greenActive = false; // Make the green plane disappear
+            movingToAsteroid = true; // Start moving towards the asteroid
+            System.out.println("Green plane hit! Score: " + score);
         }
     }
 
